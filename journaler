@@ -11,8 +11,8 @@ YEAR=$(echo "$DATE" | cut -d'-' -f 1)
 MONTH=$(echo "$DATE" | cut -d'-' -f 2)
 FINGERPRINT=6F8F715D6CEAC6CCC49D996BA7E6852582706775
 
-mkdir "$YEAR"/"$MONTH"
-cd "$YEAR"/"$MONTH" || exit
+mkdir "${YEAR}/${MONTH}"
+cd "${YEAR}/${MONTH}" || exit
 
 # will be yyyy-mm-dd[-title].md
 FILENAME="$(find . -name "${DATE}*" | cut -c 3- | cut -d '.' -f 1-2)"
