@@ -1,0 +1,38 @@
+#!/bin/bash
+# automatically write/edit journal entries
+
+error_exit() {
+	echo "$(basename $"0"): ${1:-"Unknown error"}" 1>&2
+	exit "$2"
+}
+
+DATE=$(date +%F)
+YEAR=$(echo "$DATE" | cut -d'-' -f 1)
+MONTH=$(echo "$DATE" | cut -d'-' -f 2)
+FINGERPRINT=6F8F715D6CEAC6CCC49D996BA7E6852582706775
+
+mkdir "$YEAR"/"$MONTH"
+cd "$YEAR"/"$MONTH" || exit
+
+# will be yyyy-mm-dd[-title].md
+FILENAME="$(find . -name "${DATE}*" | cut -c 3- | cut -d '.' -f 1-2)"
+
+if [[ -z "$FILENAME" ]]; then
+	# we're creating today's entry
+	printf "title: "
+	read -r TITLE
+	if [[ -n "$TITLE" ]]; then
+		FILENAME="${DATE}-${TITLE}.md"
+		printf "# %s\n\n" "$TITLE" >> "$FILENAME"
+	else
+		FILENAME="${DATE}.md"
+		printf "# %s\n\n" "$DATE" >> "$FILENAME"
+	fi
+else
+	# today's entry exists and should be encrypted
+	gpg -o "$FILENAME" --decrypt "${FILENAME}.gpg"
+fi
+
+vim "$FILENAME"
+gpg --encrypt --recipient "$FINGERPRINT" "$FILENAME"
+rm "$FILENAME"
