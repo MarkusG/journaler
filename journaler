@@ -6,10 +6,22 @@ error_exit() {
 	exit "$2"
 }
 
+FINGERPRINT=6F8F715D6CEAC6CCC49D996BA7E6852582706775
+
+if [[ "$1" == "export" ]]; then
+	for file in $(find . -name "*.gpg" | sort -n)
+	do
+		gpg -o - --decrypt "$file" >> export.md
+		printf "\n" >> export.md
+	done
+	gpg --encrypt --recipient "$FINGERPRINT" export.md
+	rm export.md
+	exit 0
+fi
+
 DATE=$(date +%F)
 YEAR=$(echo "$DATE" | cut -d'-' -f 1)
 MONTH=$(echo "$DATE" | cut -d'-' -f 2)
-FINGERPRINT=6F8F715D6CEAC6CCC49D996BA7E6852582706775
 
 mkdir "${YEAR}/${MONTH}"
 cd "${YEAR}/${MONTH}" || exit
